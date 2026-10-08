@@ -1,0 +1,137 @@
+# IoT-Based Power Monitoring System
+# EEE Mini Project - Python
+
+import random
+import time
+import csv
+from datetime import datetime
+
+# Electricity tariff (₹ per kWh)
+TARIFF = 7.00
+
+# CSV file for storing data
+FILE_NAME = "power_data.csv"
+
+
+def calculate_power(voltage, current, power_factor):
+    """Calculate real power in watts."""
+    return voltage * current * power_factor
+
+
+def save_data(voltage, current, power, energy, cost):
+    """Save monitoring data to CSV file."""
+
+    with open(FILE_NAME, "a", newline="") as file:
+
+        writer = csv.writer(file)
+
+        writer.writerow([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            round(voltage, 2),
+            round(current, 2),
+            round(power, 2),
+            round(energy, 4),
+            round(cost, 2)
+        ])
+
+
+def display_data(voltage, current, power, energy, cost):
+
+    print("\n======================================")
+    print("       IoT POWER MONITORING SYSTEM")
+    print("======================================")
+    print(f"Voltage       : {voltage:.2f} V")
+    print(f"Current       : {current:.2f} A")
+    print(f"Power         : {power:.2f} W")
+    print(f"Energy        : {energy:.4f} kWh")
+    print(f"Electricity   : ₹{cost:.2f}")
+    print("======================================")
+
+
+def main():
+
+    total_energy = 0.0
+
+    # Create CSV file and header
+    with open(FILE_NAME, "w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow([
+            "Date/Time",
+            "Voltage(V)",
+            "Current(A)",
+            "Power(W)",
+            "Energy(kWh)",
+            "Cost(Rs)"
+        ])
+
+    print("======================================")
+    print("     IoT-BASED POWER MONITORING")
+    print("======================================")
+
+    print("\nStarting monitoring...")
+    print("Press Ctrl+C to stop.\n")
+
+    try:
+
+        while True:
+
+            # Simulated sensor readings
+            voltage = random.uniform(220, 240)
+            current = random.uniform(0.5, 5.0)
+            power_factor = random.uniform(0.80, 1.00)
+
+            # Calculate power
+            power = calculate_power(
+                voltage,
+                current,
+                power_factor
+            )
+
+            # Assume each reading represents 1 second
+            time_hours = 1 / 3600
+
+            # Energy in kWh
+            energy = (power * time_hours) / 1000
+
+            # Add to total energy
+            total_energy += energy
+
+            # Electricity cost
+            cost = total_energy * TARIFF
+
+            # Display values
+            display_data(
+                voltage,
+                current,
+                power,
+                total_energy,
+                cost
+            )
+
+            # Save data
+            save_data(
+                voltage,
+                current,
+                power,
+                total_energy,
+                cost
+            )
+
+            # Wait 2 seconds
+            time.sleep(2)
+
+    except KeyboardInterrupt:
+
+        print("\n\n======================================")
+        print("          MONITORING STOPPED")
+        print("======================================")
+
+        print(f"Total Energy : {total_energy:.4f} kWh")
+        print(f"Total Cost   : ₹{total_energy * TARIFF:.2f}")
+
+        print(f"\nData saved to: {FILE_NAME}")
+
+
+if __name__ == "__main__":
+    main()
